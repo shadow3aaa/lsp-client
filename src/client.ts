@@ -61,6 +61,9 @@ const clientCapabilities: lsp.ClientCapabilities = {
     typeDefinition: {},
     references: {},
   },
+  window: {
+    showMessage: {}
+  }
 }
 
 /// A workspace mapping is used to track changes made to open
@@ -191,6 +194,12 @@ export type LSPClientConfig = {
   /// When no handler is found for a notification, it will be passed
   /// to this function, if given.
   unhandledNotification?: (client: LSPClient, method: string, params: any) => void
+  /// Extra [client
+  /// capabilities](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#clientCapabilities)
+  /// to send to the server when initializing. The object provided
+  /// here will be merged with the capabilities the client provides by
+  /// default.
+  clientCapabilities?: Record<string, any>
 }
 
 /// An LSP client manages a connection to a language server. It should
@@ -241,7 +250,7 @@ export class LSPClient {
       processId: null,
       clientInfo: {name: "@codemirror/lsp-client"},
       rootUri: this.config.rootUri || null,
-      capabilities: clientCapabilities
+      capabilities: mergeCapabilities(clientCapabilities, this.config.clientCapabilities)
     }).promise.then(resp => {
       this.serverCapabilities = resp.capabilities
       let sync = resp.capabilities.textDocumentSync
@@ -425,4 +434,16 @@ function contentChangesFor(
     })
   })
   return events.reverse()
+}
+
+function mergeCapabilities(base: any, add?: any) {
+  if (add == null) return base
+  if (typeof base != "object" || typeof add != "object") return add
+  let result: Record<string, any> = {}
+  let baseProps = Object.keys(base), addProps = Object.keys(add)
+  for (let prop of baseProps)
+    result[prop] = addProps.indexOf(prop) > -1 ? mergeCapabilities(base[prop], add[prop]) : base[prop]
+  for (let prop of addProps)
+    if (baseProps.indexOf(prop) < 0) result[prop] = add[prop]
+  return result
 }
