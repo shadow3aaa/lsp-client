@@ -4,6 +4,8 @@
 
 @LSPClientConfig
 
+@LSPClientExtension
+
 @Transport
 
 @LSPPlugin
@@ -18,11 +20,15 @@
 
 ### Extensions
 
+@languageServerExtensions
+
 @languageServerSupport
 
 @serverCompletion
 
 @serverCompletionSource
+
+@serverDiagnostics
 
 @hoverTooltips
 

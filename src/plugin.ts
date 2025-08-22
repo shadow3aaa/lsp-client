@@ -27,6 +27,7 @@ export class LSPPlugin {
       languageID = lang ? lang.name : ""
     }
     client.workspace.openFile(uri, languageID, view)
+    this.syncedDoc = view.state.doc
     this.unsyncedChanges = ChangeSet.empty(view.state.doc.length)
   }
 
@@ -58,6 +59,9 @@ export class LSPPlugin {
     })
   }
 
+  /// The version of the document that was synchronized to the server.
+  syncedDoc: Text
+
   /// The changes accumulated in this editor that have not been sent
   /// to the server yet.
   unsyncedChanges: ChangeSet
@@ -66,6 +70,7 @@ export class LSPPlugin {
   /// changes](#lsp-client.LSPPlugin.unsyncedChanges). Should probably
   /// only be called by a [workspace](#lsp-client.Workspace).
   clear() {
+    this.syncedDoc = this.view.state.doc
     this.unsyncedChanges = ChangeSet.empty(this.view.state.doc.length)
   }
 
@@ -97,7 +102,11 @@ export class LSPPlugin {
   /// [`Language.name`](#language.Language.name). You can pass in
   /// a specific ID as a third parameter.
   static create(client: LSPClient, fileURI: string, languageID?: string): Extension {
-    return [lspPlugin.of({client, uri: fileURI, languageID}), lspTheme]
+    return [
+      lspPlugin.of({client, uri: fileURI, languageID}),
+      lspTheme,
+      client.extensions
+    ]
   }
 }
 
