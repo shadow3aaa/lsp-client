@@ -2,9 +2,10 @@ import type * as lsp from "vscode-languageserver-protocol"
 import {showDialog} from "@codemirror/view"
 import {ChangeSet, ChangeDesc, MapMode, Text, Extension} from "@codemirror/state"
 import {Language} from "@codemirror/language"
-import {LSPPlugin} from "./plugin"
+import {LSPPlugin, lspPlugin} from "./plugin"
 import {toPosition, fromPosition} from "./pos"
 import {Workspace, WorkspaceFile, DefaultWorkspace} from "./workspace"
+import {lspTheme} from "./theme"
 
 class Request<Result> {
   declare resolve: (result: Result) => void
@@ -200,7 +201,7 @@ export type LSPClientConfig = {
   /// or notification handlers. Any CodeMirror extensions provided
   /// here will be included in the extension returned by
   /// [`LSPPlugin.create`](#lsp-client.LSPPlugin^create).
-  extensions?: (Extension | LSPClientExtension)[]
+  extensions?: readonly (Extension | LSPClientExtension)[]
 }
 
 /// Objects of this type can be included in the
@@ -302,6 +303,29 @@ export class LSPClient {
     this.serverCapabilities = null
     this.initializing = new Promise((resolve, reject) => this.init = {resolve, reject})
     this.workspace.disconnected()
+  }
+
+  /// Create a plugin for this client, to add to an editor
+  /// configuration. This extension is necessary to use LSP-related
+  /// functionality exported by this package. The returned extension
+  /// will include the editor
+  /// extensions included in this client's
+  /// [configuration](#lsp-client.LSPClientConfig.extensions).
+  ///
+  /// Creating an editor with this plugin will cause
+  /// [`openFile`](#lsp-client.Workspace.openFile) to be called on the
+  /// workspace.
+  ///
+  /// By default, the language ID given to the server for this file is
+  /// derived from the editor's language configuration via
+  /// [`Language.name`](#language.Language.name). You can pass in
+  /// a specific ID as a third parameter.
+  plugin(fileURI: string, languageID?: string): Extension {
+    return [
+      lspPlugin.of({client: this, uri: fileURI, languageID}),
+      lspTheme,
+      this.extensions
+    ]
   }
 
   /// Send a `textDocument/didOpen` notification to the server.

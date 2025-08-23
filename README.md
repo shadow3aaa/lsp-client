@@ -35,7 +35,7 @@ This example uses a crude transport that doesn't handle errors at all.
 
 
 ```javascript
-import {Transport, LSPClient, languageServerSupport} from "@codemirror/lsp-client"
+import {Transport, LSPClient, languageServerExtensions} from "@codemirror/lsp-client"
 import {basicSetup, EditorView} from "codemirror"
 import {typescriptLanguage} from "@codemirror/lang-javascript"
 
@@ -53,13 +53,13 @@ function simpleWebSocketTransport(uri: string): Promise<Transport> {
 }
 
 let transport = await simpleWebSocketTransport("ws://host:port")
-let client = new LSPClient().connect(transport)
+let client = new LSPClient({extensions: languageServerExtensions()}).connect(transport)
 
 new EditorView({
   extensions: [
     basicSetup,
     typescriptLanguage,
-    languageServerSupport(client, "file:///some/file.ts"),
+    client.plugin("file:///some/file.ts"),
   ],
   parent: document.body
 })
