@@ -1,3 +1,11 @@
+## 6.1.1 (2025-09-02)
+
+### Bug fixes
+
+Properly declare the @codemirror/lint dependency.
+
+Make sure document changes are eagerly pushed to the server when `serverDiagnostics` is active.
+
 ## 6.1.0 (2025-08-23)
 
 ### New features
