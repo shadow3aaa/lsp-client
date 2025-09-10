@@ -1,3 +1,9 @@
+## 6.1.2 (2025-09-10)
+
+### Bug fixes
+
+Fix an issue where snippet completions would display the snippet source as their label.
+
 ## 6.1.1 (2025-09-02)
 
 ### Bug fixes
