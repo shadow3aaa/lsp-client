@@ -80,7 +80,10 @@ export const serverCompletionSource: CompletionSource = context => {
         if (item.commitCharacters && item.commitCharacters != defaultCommitChars)
           option.commitCharacters = item.commitCharacters
         if (item.detail) option.detail = item.detail
-        if (item.insertTextFormat == 2 /* Snippet */) option.apply = (view, c, from, to) => snippet(text)(view, c, from, to)
+        if (item.insertTextFormat == 2 /* Snippet */) {
+          option.apply = (view, c, from, to) => snippet(text)(view, c, from, to)
+          option.label = item.label
+        }
         if (item.documentation) option.info = () => renderDocInfo(plugin, item.documentation!)
         return option
       }),
